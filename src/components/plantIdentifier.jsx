@@ -16,13 +16,13 @@ const PlantIdentifier = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [plantInfo, setPlantInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [imageError, setImageError] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 8 * 1024 * 1024) {
-        setError("Image size must be less than 8 MB");
+        setImageError("Image size must be less than 8 MB");
         return;
       }
       setImagePreview(URL.createObjectURL(file));
@@ -121,7 +121,10 @@ const PlantIdentifier = () => {
               parsedInfo.commonIssues = [];
               break;
           }
-        } else if (line.trim().startsWith("-") && currentSection === "commonIssues") {
+        } else if (
+          line.trim().startsWith("-") &&
+          currentSection === "commonIssues"
+        ) {
           parsedInfo.commonIssues.push(line.trim().substring(1).trim());
         } else if (line.trim() && currentSection === "description") {
           parsedInfo.description += " " + line.trim();
@@ -137,7 +140,7 @@ const PlantIdentifier = () => {
 
   const identifyPlant = async (imageFile) => {
     setLoading(true);
-    setError(null);
+    setImageError(null);
 
     try {
       // Updated to use gemini-1.5-flash model
@@ -159,11 +162,13 @@ const PlantIdentifier = () => {
         }
       } catch (apiError) {
         console.error("API Error:", apiError);
-        throw new Error(`API Error: ${apiError.message || "Unknown error occurred"}`);
+        throw new Error(
+          `API Error: ${apiError.message || "Unknown error occurred"}`
+        );
       }
     } catch (err) {
       console.error("Error identifying plant:", err);
-      setError(
+      setImageError(
         `Failed to identify plant: ${err.message}. Please try again or contact support if the issue persists.`
       );
     } finally {
@@ -190,7 +195,7 @@ const PlantIdentifier = () => {
         />
       </div>
       <FileImage className="mx-auto h-12 w-auto text-gray-400" />
-      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 4MB</p>
+      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 8MB</p>
     </div>
   );
 
@@ -221,7 +226,6 @@ const PlantIdentifier = () => {
         imagePreview={imagePreview}
         plantInfo={plantInfo}
         loading={loading}
-        error={error}
       />
     );
   }
@@ -251,23 +255,31 @@ const PlantIdentifier = () => {
 
         <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 justify-center items-center">
           {/* Image Upload */}
-          <label htmlFor="image-upload" className="block w-full md:w-1/2 cursor-pointer">
+          <label
+            htmlFor="image-upload"
+            className="block w-full md:w-1/2 cursor-pointer"
+          >
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
               {uploadImgEl}
             </div>
           </label>
 
           {/* Capture from Camera */}
-          <label htmlFor="camera-upload" className="block w-full md:w-1/2 cursor-pointer">
+          <label
+            htmlFor="camera-upload"
+            className="block w-full md:w-1/2 cursor-pointer"
+          >
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
               {captureImgEl}
             </div>
           </label>
         </div>
 
-        <AlertEl>
-          <p>{error}</p>
-        </AlertEl>
+        {imageError && (
+          <AlertEl>
+            <p>{imageError}</p>
+          </AlertEl>
+        )}
 
         {plantDetailsEl}
       </div>
@@ -277,7 +289,9 @@ const PlantIdentifier = () => {
       {/* Footer */}
       <footer className="bg-gray-100 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-500">© 2024 PlantBuddy. Made with 🌱 for plant lovers.</p>
+          <p className="text-gray-500">
+            © 2024 PlantBuddy. Made with 🌱 for plant lovers.
+          </p>
         </div>
       </footer>
     </div>
