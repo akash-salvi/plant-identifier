@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Droplets, Sun, ThermometerSun } from "lucide-react";
-import AlertEl from "../utils/alertEl";
 
-const PlantDetails = ({ imagePreview, loading, error, plantInfo }) => {
+const PlantDetails = ({ imagePreview, loading, plantInfo }) => {
   return (
     <div className="mt-4 bg-white rounded-xl shadow-lg overflow-hidden mb-8">
       <div className="p-4 md:p-8">
@@ -22,12 +21,6 @@ const PlantDetails = ({ imagePreview, loading, error, plantInfo }) => {
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
               <span className="text-gray-500">Identifying plant...</span>
             </div>
-          )}
-
-          {error && (
-            <AlertEl>
-              <p>{error}</p>
-            </AlertEl>
           )}
 
           {!loading && plantInfo && (

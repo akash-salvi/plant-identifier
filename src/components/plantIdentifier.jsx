@@ -1,11 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Camera, FileImage } from "lucide-react";
 import { useState } from "react";
+import AlertEl from "../utils/alertEl";
+import { PLANT_ANALYSIS_PROMPT } from "../utils/const";
 import AppDetailsSection from "./appDetailsSection";
 import BodyHeader from "./bodyHeader";
 import Navbar from "./navbar";
 import PlantDetails from "./plantDetails";
-import { PLANT_ANALYSIS_PROMPT } from "../utils/const";
 
 // Replace with your actual API key
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -20,8 +21,8 @@ const PlantIdentifier = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) {
-        setError("Image size must be less than 4MB");
+      if (file.size > 8 * 1024 * 1024) {
+        setError("Image size must be less than 8 MB");
         return;
       }
       setImagePreview(URL.createObjectURL(file));
@@ -263,6 +264,10 @@ const PlantIdentifier = () => {
             </div>
           </label>
         </div>
+
+        <AlertEl>
+          <p>{error}</p>
+        </AlertEl>
 
         {plantDetailsEl}
       </div>
