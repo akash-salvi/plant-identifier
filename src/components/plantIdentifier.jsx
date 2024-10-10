@@ -172,6 +172,48 @@ const PlantIdentifier = () => {
 
   let plantDetailsEl = null;
 
+  let uploadImgEl = (
+    <div className="space-y-1 text-center">
+      <div className="text-sm text-gray-600">
+        <span className="relative cursor-pointer font-medium text-green-600 hover:text-green-500">
+          Upload an Image
+        </span>
+
+        <input
+          id="image-upload"
+          name="image-upload"
+          type="file"
+          className="sr-only"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
+      <FileImage className="mx-auto h-12 w-auto text-gray-400" />
+      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 4MB</p>
+    </div>
+  );
+
+  let captureImgEl = (
+    <div className="space-y-1 text-center">
+      <div className="text-sm text-gray-600">
+        <span className="relative cursor-pointer font-medium text-green-600 hover:text-green-500">
+          Capture Image
+        </span>
+        <input
+          id="camera-upload"
+          name="camera-upload"
+          type="file"
+          className="sr-only"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+        />
+      </div>
+      <Camera className="mx-auto h-12 w-12 text-gray-400" />
+      <p className="text-xs text-gray-500">Use your device&apos;s camera</p>
+    </div>
+  );
+
   if (plantInfo || imagePreview) {
     plantDetailsEl = (
       <PlantDetails
@@ -180,6 +222,21 @@ const PlantIdentifier = () => {
         loading={loading}
         error={error}
       />
+    );
+  }
+
+  if (loading) {
+    uploadImgEl = (
+      <div className="space-y-1 text-center flex space-x-4 items-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+        <span className="text-gray-500">Identifying plant...</span>
+      </div>
+    );
+    captureImgEl = (
+      <div className="space-y-1 text-center flex space-x-4 items-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+        <span className="text-gray-500">Identifying plant...</span>
+      </div>
     );
   }
 
@@ -195,47 +252,14 @@ const PlantIdentifier = () => {
           {/* Image Upload */}
           <label htmlFor="image-upload" className="block w-full md:w-1/2 cursor-pointer">
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
-              <div className="space-y-1 text-center">
-                <div className="text-sm text-gray-600">
-                  <span className="relative cursor-pointer font-medium text-green-600 hover:text-green-500">
-                    Upload an Image
-                  </span>
-                  <input
-                    id="image-upload"
-                    name="image-upload"
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </div>
-                <FileImage className="mx-auto h-12 w-auto text-gray-400" />
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 4MB</p>
-              </div>
+              {uploadImgEl}
             </div>
           </label>
 
           {/* Capture from Camera */}
           <label htmlFor="camera-upload" className="block w-full md:w-1/2 cursor-pointer">
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
-              <div className="space-y-1 text-center">
-                <div className="text-sm text-gray-600">
-                  <span className="relative cursor-pointer font-medium text-green-600 hover:text-green-500">
-                    Capture Image
-                  </span>
-                  <input
-                    id="camera-upload"
-                    name="camera-upload"
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleFileChange}
-                  />
-                </div>
-                <Camera className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="text-xs text-gray-500">Use your device&apos;s camera</p>
-              </div>
+              {captureImgEl}
             </div>
           </label>
         </div>
