@@ -1,5 +1,6 @@
-import { Leaf, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import LeafIcon from "../assets/plant-icon.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +14,7 @@ const Navbar = () => {
       <div className="bg-green-600 text-white p-4 sm:px-6 lg:px-8 mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center space-x-4">
-          <Leaf className="h-8 w-8" />
+          <img src={LeafIcon} alt="icon" className="h-8 w-8 bg-white rounded-sm p-1" />
           <a href="#" className="text-2xl font-bold">
             PlantBuddy
           </a>
