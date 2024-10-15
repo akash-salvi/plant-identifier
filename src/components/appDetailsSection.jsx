@@ -15,7 +15,7 @@ const AppDetailsSection = () => (
           <h3 className="text-xl font-semibold text-gray-900 mb-2">1. Upload an Image</h3>
           <p className="text-gray-600">
             Take a clear photo of a plant and upload it. We support JPG, PNG, and GIF formats up to
-            4MB.
+            8MB.
           </p>
         </div>
 
