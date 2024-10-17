@@ -1,6 +1,6 @@
 import LeafIcon from "../assets/plant-icon.png";
 
-const BodyHeader = () => {
+const Hero = () => {
   return (
     <div className="p-8">
       <div className="text-center">
@@ -14,4 +14,4 @@ const BodyHeader = () => {
   );
 };
 
-export default BodyHeader;
+export default Hero;
