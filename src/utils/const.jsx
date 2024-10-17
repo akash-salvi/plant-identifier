@@ -9,7 +9,7 @@ Light: [Light requirements]
 Water: [Watering needs]
 Humidity: [Humidity preferences]
 
-Description: [Brief description of the plant]
+Description: [Brief description of the plant, don't add description on new line]
 
 Additional Information:
 Growth Rate: [Slow/Medium/Fast]

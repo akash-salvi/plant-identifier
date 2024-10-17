@@ -3,8 +3,8 @@ import { Camera, FileImage } from "lucide-react";
 import { useState } from "react";
 import AlertEl from "../utils/alertEl";
 import { PLANT_ANALYSIS_PROMPT } from "../utils/const";
-import AppDetailsSection from "./appDetailsSection";
-import BodyHeader from "./bodyHeader";
+import AppUsageDetails from "./appUsageDetails";
+import Hero from "./hero";
 import Navbar from "./navbar";
 import PlantDetails from "./plantDetails";
 
@@ -17,6 +17,11 @@ const PlantIdentifier = () => {
   const [plantInfo, setPlantInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(null);
+  const [language, setLanguage] = useState("en");
+
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -121,10 +126,7 @@ const PlantIdentifier = () => {
               parsedInfo.commonIssues = [];
               break;
           }
-        } else if (
-          line.trim().startsWith("-") &&
-          currentSection === "commonIssues"
-        ) {
+        } else if (line.trim().startsWith("-") && currentSection === "commonIssues") {
           parsedInfo.commonIssues.push(line.trim().substring(1).trim());
         } else if (line.trim() && currentSection === "description") {
           parsedInfo.description += " " + line.trim();
@@ -144,9 +146,9 @@ const PlantIdentifier = () => {
 
     try {
       // Updated to use gemini-1.5-flash model
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", language: "hi" });
 
-      const prompt = PLANT_ANALYSIS_PROMPT;
+      const prompt = `${PLANT_ANALYSIS_PROMPT} And keep the label/title in english language but respective response/details in ${language} language.`;
 
       const imagePart = await fileToGenerativePart(imageFile);
 
@@ -162,9 +164,7 @@ const PlantIdentifier = () => {
         }
       } catch (apiError) {
         console.error("API Error:", apiError);
-        throw new Error(
-          `API Error: ${apiError.message || "Unknown error occurred"}`
-        );
+        throw new Error(`API Error: ${apiError.message || "Unknown error occurred"}`);
       }
     } catch (err) {
       console.error("Error identifying plant:", err);
@@ -222,11 +222,7 @@ const PlantIdentifier = () => {
 
   if (plantInfo || imagePreview) {
     plantDetailsEl = (
-      <PlantDetails
-        imagePreview={imagePreview}
-        plantInfo={plantInfo}
-        loading={loading}
-      />
+      <PlantDetails imagePreview={imagePreview} plantInfo={plantInfo} loading={loading} />
     );
   }
 
@@ -251,24 +247,37 @@ const PlantIdentifier = () => {
       <Navbar />
 
       <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 lg:w-[920px]">
-        <BodyHeader />
+        <Hero />
+
+        <div className="mb-4 bg-white p-4 rounded-md border border-gray-300">
+          <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 mb-2">
+            Choose a language before uploading or capturing.
+          </label>
+          <select
+            id="language-select"
+            value={language}
+            onChange={handleLanguageChange}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-r-8 border-transparent outline outline-gray-300 sm:text-sm rounded-md"
+          >
+            <option value="English">English</option>
+            <option value="Hindi">हिन्दी</option>
+            <option value="Marathi">मराठी</option>
+            <option value="French">Français</option>
+            <option value="German">Deutsch</option>
+            <option value="Italian">Italiano</option>
+          </select>
+        </div>
 
         <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 justify-center items-center">
           {/* Image Upload */}
-          <label
-            htmlFor="image-upload"
-            className="block w-full md:w-1/2 cursor-pointer"
-          >
+          <label htmlFor="image-upload" className="block w-full md:w-1/2 cursor-pointer">
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
               {uploadImgEl}
             </div>
           </label>
 
           {/* Capture from Camera */}
-          <label
-            htmlFor="camera-upload"
-            className="block w-full md:w-1/2 cursor-pointer"
-          >
+          <label htmlFor="camera-upload" className="block w-full md:w-1/2 cursor-pointer">
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-green-500 transition-colors duration-200">
               {captureImgEl}
             </div>
@@ -284,14 +293,12 @@ const PlantIdentifier = () => {
         {plantDetailsEl}
       </div>
 
-      <AppDetailsSection />
+      <AppUsageDetails />
 
       {/* Footer */}
       <footer className="bg-gray-100 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-500">
-            © 2024 PlantBuddy. Made with 🌱 for plant lovers.
-          </p>
+          <p className="text-gray-500">© 2024 PlantBuddy. Made with 🌱 for plant lovers.</p>
         </div>
       </footer>
     </div>
