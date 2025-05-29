@@ -10,6 +10,7 @@ import PlantDetails from "./plantDetails";
 
 // Replace with your actual API key
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_MODAL = import.meta.env.VITE_GEMINI_MODAL;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const PlantIdentifier = () => {
@@ -144,7 +145,7 @@ const PlantIdentifier = () => {
 
     try {
       // Updated to use gemini-1.5-flash model
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: GEMINI_MODAL });
 
       const prompt = PLANT_ANALYSIS_PROMPT;
 
