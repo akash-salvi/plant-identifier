@@ -43,135 +43,69 @@ const PlantIdentifier = () => {
     };
   };
 
-  const parseGeminiResponse = (response) => {
-    try {
-      const text = response.text();
-
-      let parsedInfo = {
-        name: "Unknown",
-        scientificName: "Not available",
-        family: "Not available",
-        care: {
-          light: "Not specified",
-          water: "Not specified",
-          humidity: "Not specified",
-        },
-        description: "No description available",
-        additionalInfo: {
-          growthRate: "Not specified",
-          maxHeight: "Not specified",
-          toxicity: "Not specified",
-          propagation: "Not specified",
-          soilType: "Not specified",
-          fertilization: "Not specified",
-        },
-        commonIssues: ["No common issues specified"],
-      };
-
-      // Simple key-value parsing
-      const lines = text.split("\n");
-      let currentSection = "";
-
-      lines.forEach((line) => {
-        if (line.includes(":")) {
-          const [key, value] = line.split(":").map((part) => part.trim());
-
-          switch (key.toLowerCase()) {
-            case "name":
-              parsedInfo.name = value;
-              break;
-            case "scientific name":
-              parsedInfo.scientificName = value;
-              break;
-            case "family":
-              parsedInfo.family = value;
-              break;
-            case "light":
-              parsedInfo.care.light = value;
-              break;
-            case "water":
-              parsedInfo.care.water = value;
-              break;
-            case "humidity":
-              parsedInfo.care.humidity = value;
-              break;
-            case "description":
-              currentSection = "description";
-              parsedInfo.description = value;
-              break;
-            case "growth rate":
-              parsedInfo.additionalInfo.growthRate = value;
-              break;
-            case "maximum height":
-              parsedInfo.additionalInfo.maxHeight = value;
-              break;
-            case "toxicity":
-              parsedInfo.additionalInfo.toxicity = value;
-              break;
-            case "propagation":
-              parsedInfo.additionalInfo.propagation = value;
-              break;
-            case "soil type":
-              parsedInfo.additionalInfo.soilType = value;
-              break;
-            case "fertilization":
-              parsedInfo.additionalInfo.fertilization = value;
-              break;
-            case "common issues":
-              currentSection = "commonIssues";
-              parsedInfo.commonIssues = [];
-              break;
-          }
-        } else if (
-          line.trim().startsWith("-") &&
-          currentSection === "commonIssues"
-        ) {
-          parsedInfo.commonIssues.push(line.trim().substring(1).trim());
-        } else if (line.trim() && currentSection === "description") {
-          parsedInfo.description += " " + line.trim();
-        }
-      });
-
-      return parsedInfo;
-    } catch (err) {
-      console.error("Error parsing Gemini response:", err);
-      throw new Error("Failed to parse plant information");
-    }
-  };
-
   const identifyPlant = async (imageFile) => {
     setLoading(true);
     setImageError(null);
+    // Clear previous info when a new image is uploaded
+    setPlantInfo(null);
 
     try {
-      // Updated to use gemini-1.5-flash model
-      const model = genAI.getGenerativeModel({ model: GEMINI_MODAL });
+      const model = genAI.getGenerativeModel({
+        model: GEMINI_MODAL,
+        generationConfig: {
+          response_mime_type: "application/json",
+        },
+      });
 
       const prompt = PLANT_ANALYSIS_PROMPT;
-
       const imagePart = await fileToGenerativePart(imageFile);
 
-      try {
-        const result = await model.generateContent([prompt, imagePart]);
-        const response = await result.response;
+      const result = await model.generateContent([prompt, imagePart]);
+      const response = result.response;
+      const responseText = response.text();
 
-        if (response && response.text) {
-          const parsedInfo = parseGeminiResponse(response);
-          setPlantInfo(parsedInfo);
-        } else {
-          throw new Error("Received empty response from Gemini API");
-        }
-      } catch (apiError) {
-        console.error("API Error:", apiError);
-        throw new Error(
-          `API Error: ${apiError.message || "Unknown error occurred"}`
-        );
+      if (!responseText) {
+        throw new Error("Received empty response from Gemini API");
       }
+
+      // Directly parse the JSON string from the API
+      const geminiJson = JSON.parse(responseText);
+
+      // Map the response from Gemini to the structure your React component expects
+      const formattedPlantInfo = {
+        name: geminiJson.Name || "Unknown",
+        scientificName: geminiJson["Scientific Name"] || "Not available",
+        family: geminiJson.Family || "Not available",
+        description: geminiJson.Description || "No description available",
+        care: {
+          light: geminiJson["Care Instructions"]?.Light || "Not specified",
+          water: geminiJson["Care Instructions"]?.Water || "Not specified",
+          humidity: geminiJson["Care Instructions"]?.Humidity || "Not specified",
+        },
+        additionalInfo: {
+          growthRate: geminiJson["Additional Information"]?.["Growth Rate"] || "Not specified",
+          maxHeight: geminiJson["Additional Information"]?.["Maximum Height"] || "Not specified",
+          toxicity: geminiJson["Additional Information"]?.Toxicity || "Not specified",
+          propagation: geminiJson["Additional Information"]?.Propagation || "Not specified",
+          soilType: geminiJson["Additional Information"]?.["Soil Type"] || "Not specified",
+          fertilization: geminiJson["Additional Information"]?.Fertilization || "Not specified",
+        },
+        commonIssues: geminiJson["Common Issues"] || ["No common issues specified"],
+      };
+
+      setPlantInfo(formattedPlantInfo);
+
     } catch (err) {
       console.error("Error identifying plant:", err);
-      setImageError(
-        `Failed to identify plant: ${err.message}. Please try again or contact support if the issue persists.`
-      );
+      let errorMessage = "Failed to identify plant. Please try again.";
+
+      if (err instanceof SyntaxError) {
+        errorMessage = "Failed to read the data from the AI. The format might be incorrect.";
+      } else if (err.message) {
+        errorMessage = `An error occurred: ${err.message}`;
+      }
+
+      setImageError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -246,7 +180,6 @@ const PlantIdentifier = () => {
     );
   }
 
-  // Rest of the component remains the same
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col">
       <Navbar />
